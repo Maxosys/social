@@ -1,0 +1,248 @@
+<script src="https://apis.google.com/js/client:platform.js" async defer></script>
+<link type="text/css" rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500"> 
+
+
+class Welcome  {
+
+public function gactivity()
+		{
+			print_r($_REQUEST);
+			print_r($this->session->userdata);
+			exit;
+		}
+		
+		public function login()
+		{
+			if(isset($_REQUEST["fbid"]))
+				{
+					$emails =  $_REQUEST["email"];
+					$signup_password = md5("12345"); // set blank or according to your security
+
+					$result = $this->site_model->login_user($emails,$signup_password);
+
+							if(empty($result) && count($result)<=0)
+							{
+								$this->session->set_flashdata('msg', 'Incorrect Email or Password');
+								
+								echo "2";
+							}
+							else
+							{
+									$sess_arry = array();					
+
+									foreach($result as $row) {
+										$sess_arry= array(
+										'id'=>$row["user_id"],
+										'fname'=>$row["fname"],
+										'email'=>$row["email"],
+										'account_type'=>$row["account_type"]
+										);
+										
+										$this->session->set_userdata('logged_in',$sess_arry);
+									}
+
+								echo "3";
+							}
+
+							exit;
+				}
+
+				if(isset($_REQUEST["googleId"]))
+				{
+					$emails = $_REQUEST["emails"];					
+					$signup_password = md5("12345"); // set blank or according to your security
+				
+					$result = $this->site_model->login_user($emails,$signup_password);
+
+							if(empty($result) && count($result)<=0)
+							{
+								$this->session->set_flashdata('msg', 'Incorrect Email or Password');
+								
+								echo "2";
+							}
+							else
+							{
+								$sess_arry = array();
+
+								foreach($result as $row) {
+										
+										$sess_arry= array(
+										'id'=>$row["user_id"],
+										'fname'=>$row["fname"],
+										'email'=>$row["email"],
+										'account_type'=>$row["account_type"]
+										);
+										
+										$this->session->set_userdata('logged_in',$sess_arry);
+								}
+
+								echo "3";
+							}
+					exit;
+				}
+		}
+		
+		public function register()
+		{
+			if(isset($this->session->userdata["logged_in"]["id"]))
+			{			
+				redirect('welcome/index');
+			}			
+			
+			
+			// FACEBOOK
+
+				if(isset($_REQUEST["fbid"]))
+				{
+					$emails =  $_REQUEST["email"];
+					$check=$this->db->query("select * from users where email='".$emails."'")->result_array();
+				
+					if(empty($check) && count($check)<=0) {
+
+						$fbid 		= $_REQUEST["fbid"];
+						$firstname 	= $_REQUEST["firstname"];						
+						$lastname 	= $_REQUEST["lastname"];
+						$name 		= $_REQUEST["name"];
+						$logintype 	= $_REQUEST["logintype"];
+
+						$signup_password = md5("12345");
+
+							$userinfo = array(
+							'fname'=>$firstname,
+							'lname'=>$lastname,
+							'email'=>$emails,
+							'password'=>$signup_password,
+							'location'=>"",
+							'created_at'=>date("Y-m-d H:i:s"),
+							'account_type' => $logintype,    		 // facebook
+							'social_id' => $fbid,
+							'status' => 1
+							);
+
+					$resultRegistered = $this->site_model->save_user($userinfo);
+					$result  = $this->site_model->login_user($emails,$signup_password);
+
+						if($result)
+						{
+							$sess_arry = array();
+
+							foreach($result as $row) {
+							
+								$sess_arry= array(
+								'id'=>$row["user_id"],
+								'fname'=>$row["fname"],
+								'email'=>$row["email"],
+								'account_type'=>$row["account_type"]
+								);
+								
+								$this->session->set_userdata('logged_in',$sess_arry);
+						    }					
+						 
+						}
+						
+						echo "3";
+					}
+					else
+					{
+						echo "1";
+					}
+
+					exit;
+				}
+
+			// GOOGLE
+
+				if(isset($_REQUEST["googleId"]))
+				{
+					$emails = $_REQUEST["emails"];
+				
+					$check=$this->db->query("select * from users where email='".$emails."'")->result_array();
+				
+					if(empty($check) && count($check)<=0) {
+
+						$googleId  = $_REQUEST["googleId"];
+						$fullname  = $_REQUEST["fullname"];
+						$firstname = $_REQUEST["firstname"];
+						$lastname  = $_REQUEST["lastname"];
+						$logintype = $_REQUEST["logintype"];
+						$gender    = $_REQUEST["gender"];
+						$emails    = $_REQUEST["emails"];
+						$gimage    = $_REQUEST["gimage"];
+
+							$signup_password = md5("12345");
+
+							$userinfo = array(
+							'fname'=>$firstname,
+							'lname'=>$lastname,
+							'email'=>$emails,
+							'password'=>$signup_password,
+							'location'=>"",
+							'created_at'=>date("Y-m-d H:i:s"),
+							'account_type' => $logintype,
+							'social_id' => $googleId,
+							'status' => 1
+							);
+							
+							$resultRegistered = $this->site_model->save_user($userinfo);
+
+							$result  = $this->site_model->login_user($emails,$signup_password);
+
+							if($result)
+							{
+								$sess_arry = array();
+
+								foreach($result as $row) {
+									$sess_arry= array(
+									'id'=>$row["user_id"],
+									'fname'=>$row["fname"],
+									'email'=>$row["email"],
+									'account_type'=>$row["account_type"]
+									);
+									$this->session->set_userdata('logged_in',$sess_arry);
+								}
+							}
+
+						echo "3";
+					}
+					else
+					{
+							$emails = $_REQUEST["emails"];					
+							$signup_password = md5("12345");
+				
+							$result = $this->site_model->login_user($emails,$signup_password);
+
+							if(empty($result) && count($result)<=0)
+							{
+								$this->session->set_flashdata('msg', 'Incorrect Email or Password');
+								
+								echo "1";
+							}
+							else
+							{
+								$sess_arry = array();
+
+								foreach($result as $row) {
+										
+										$sess_arry= array(
+										'id'=>$row["user_id"],
+										'fname'=>$row["fname"],
+										'email'=>$row["email"],
+										'account_type'=>$row["account_type"]
+										);
+										
+										$this->session->set_userdata('logged_in',$sess_arry);
+								}
+
+								echo "3";
+							}
+
+						//echo "1";
+					}
+
+					exit;
+				}
+				}
+		
+		
+}
+		
